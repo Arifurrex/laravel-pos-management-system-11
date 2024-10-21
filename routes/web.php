@@ -10,6 +10,7 @@ Route::get('/authentication/signIn', [AuthenticationController::class,'signIn'])
 Route::get('/authentication/signUp', [AuthenticationController::class,'signUp'])->name('authentication.signUp');
 
 
+
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
