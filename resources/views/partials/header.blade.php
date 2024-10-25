@@ -32,7 +32,7 @@
             <!-- Hamburger Toggle BTN -->
             <a class="block flex-shrink-0 lg:hidden" href="index.html">
 
-                <img src="{{ Vite::asset('resources/images/logo/logo-icon.svg') }}" alt="Logo" />
+                <img src="{{ Vite::asset('resources/images/logo/pos-logo.webp') }}" alt="Logo" style="height:35px; width:35px"/>
 
             </a>
         </div>

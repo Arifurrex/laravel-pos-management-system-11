@@ -12,7 +12,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $data['products'] = product::all();
+        return view('product.index', $data);
     }
 
     /**
@@ -20,7 +21,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return view('product.create');
     }
 
     /**
@@ -28,7 +29,16 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validateData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'brand' => 'nullable|string|max:255',
+            'price' => 'required|numeric',
+            'quantity' => 'required|numeric',
+            'alert_stock' => 'required|numeric',
+        ]);
+        product::create($validateData);
+        return redirect()->route('products.create')->with('success', 'successfully save ');
     }
 
     /**
@@ -42,17 +52,28 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(product $product)
+    public function edit($id)
     {
-        //
+        $data['product'] = product::find($id);
+        return view('product.edit', $data);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, product $product)
+    public function update(Request $request, $id)
     {
-        //
+        $validateData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'brand' => 'nullable|string|max:255',
+            'price' => 'required|numeric',
+            'quantity' => 'required|numeric',
+            'alert_stock' => 'required|numeric',
+        ]);
+
+        $data['product'] = product::find($id)->update($validateData);
+        return redirect()->back()->with('success', 'successfully update');
     }
 
     /**
@@ -60,6 +81,7 @@ class ProductController extends Controller
      */
     public function destroy(product $product)
     {
-        //
+        $product->delete();
+        return redirect()->back()->with('success', 'successfully delete');
     }
 }
