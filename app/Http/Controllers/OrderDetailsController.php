@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\order_details;
+use Illuminate\Cache\RedisTagSet;
 use Illuminate\Http\Request;
 
 class OrderDetailsController extends Controller
@@ -20,7 +21,6 @@ class OrderDetailsController extends Controller
      */
     public function create()
     {
-        //
     }
 
     /**

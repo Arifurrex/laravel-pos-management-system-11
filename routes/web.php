@@ -26,12 +26,12 @@ Route::view('/index', 'index');
 
 
 Route::resource('/authentication',AuthenticationController::class);
-Route::resource('/order',OrderController::class);
+Route::resource('/orders',OrderController::class);
 Route::resource('/products',ProductController::class);
 Route::resource('/suppliers',SupplierController::class);
-Route::resource('/order',CompanyController::class);
-Route::resource('/order',OrderDetailsController::class);
-Route::resource('/order',TransactionController::class);
+Route::resource('/company',CompanyController::class);
+Route::resource('/orderDetails',OrderDetailsController::class);
+Route::resource('/transaction',TransactionController::class);
 
 
 // user route

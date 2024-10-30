@@ -6,23 +6,30 @@
 
 <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
     <!-- order product -->
-    <div class="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-
-        <!-- order products start -->
-        <div
-            class="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-8">
-            <div
-                class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
-                <div class="max-w-full overflow-x-auto">
-                    <table class="w-full table-auto"
-                        x-data="{
+    <div x-data="{
                         inputs: [{ qty: '', price: '', disc: '', total: 0 }],
                         isOptionSelected: false,
                         calculateTotal(index) {
                             let item = this.inputs[index];
                             let discount = item.disc ? item.disc / 100 : 0; // ডিসকাউন্টকে শতকরা হিসেবে ধরে নিন
                             item.total = (item.qty && item.price) ? item.qty * item.price * (1 - discount) : 0;
-                        } }">
+                        },
+                        calculateGrandTotal() {
+                          return this.inputs.reduce((sum, input) => sum + Number(input.total), 0);
+                        },
+                        calculatePaid(){
+                            this.calculateGrandTotal();
+                        },
+                        }"
+
+        class="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+
+        <!-- order products start -->
+        <div class="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-8">
+            <div
+                class="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+                <div class="max-w-full overflow-x-auto">
+                    <table class="w-full table-auto">
                         <thead>
                             <tr class="bg-gray-2 text-left dark:bg-meta-4">
                                 <!-- product start -->
@@ -63,7 +70,14 @@
                                 <!-- button start-->
                                 <th class="px-4 py-4 font-medium text-black dark:text-white">
                                     <div class="flex h-9 w-full max-w-9 items-center justify-center  dark:border-white cursor-pointer">
-                                        <svg @click="inputs.push({ qty: '', price: '', disc: '', total: '' })" class="fill-primary dark:fill-white" width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <svg
+                                            @click="inputs.push({ qty: '', price: '', disc: '', total: '' })"
+                                            class="fill-primary dark:fill-white"
+                                            width="14"
+                                            height="14"
+                                            viewBox="0 0 15 15"
+                                            fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
                                             <path d="M13.2969 6.51563H8.48438V1.70312C8.48438 1.15625 8.04688 0.773438 7.5 0.773438C6.95313 0.773438 6.57031 1.21094 6.57031 1.75781V6.57031H1.75781C1.21094 6.57031 0.828125 7.00781 0.828125 7.55469C0.828125 8.10156 1.26563 8.48438 1.8125 8.48438H6.625V13.2969C6.625 13.8438 7.0625 14.2266 7.60938 14.2266C8.15625 14.2266 8.53906 13.7891 8.53906 13.2422V8.42969H13.3516C13.8984 8.42969 14.2813 7.99219 14.2813 7.44531C14.2266 6.95312 13.7891 6.51563 13.2969 6.51563Z" fill=""></path>
                                         </svg>
                                     </div>
@@ -77,11 +91,16 @@
                                     <!-- product start -->
                                     <td
                                         class="border-b border-[#eee] px-4 py-5  dark:border-strokedark">
-                                        <select class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input" :class="isOptionSelected &amp;&amp; 'text-black dark:text-white'" @change="isOptionSelected = true" name="product_id[]">
-                                            <option value="" class="text-body">Select Product</option>
-                                            <option value="" class="text-body">Option 1</option>
-                                            <option value="" class="text-body">Option 2</option>
-                                            <option value="" class="text-body">Option 3</option>
+                                        <select class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 pl-5 pr-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+                                            :class="isOptionSelected && 'text-black dark:text-white'"
+                                            @change="isOptionSelected = true"
+                                            @change="fetchProductDetails()"
+                                            name="product_id[]">
+                                            <option disabled class="text-body">Select Product</option>
+                                            @foreach ($products as $product)
+                                            <option value="{{$product->id}}" class="text-body">{{$product->name}}</option>
+
+                                            @endforeach
                                         </select>
                                     </td>
                                     <!-- product end -->
@@ -169,7 +188,140 @@
         <!-- total amount display start  -->
         <div
             class="col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-4">
-            total
+            <!-- total start -->
+            <div class="mb-6 text-xl bg-meta-3 px-10 py-4 text-white hover:bg-opacity-90 font-bold dark:text-white">Total: <span class="text-title-md" x-text="calculateGrandTotal().toFixed(2)"></span>
+            </div>
+            <!-- total end -->
+            <!-- print / history / report buttons start -->
+            <div class="flex items-center mb-4">
+                <a href="#" class="inline-flex border border-primary bg-primary px-2 py-1 font-medium text-white hover:border-primary hover:bg-primary hover:text-white dark:hover:border-primary sm:px-6 sm:py-3">Print</a>
+                <a href="#" class="inline-flex border-y border-stroke px-2 py-1 font-medium text-black hover:border-primary hover:bg-primary hover:text-white dark:border-strokedark dark:text-white dark:hover:border-primary sm:px-6 sm:py-3">History</a>
+                <a href="#" class="inline-flex border border-stroke px-2 py-1 font-medium text-black hover:border-primary hover:bg-primary hover:text-white dark:border-strokedark dark:text-white dark:hover:border-primary sm:px-6 sm:py-3">Report</a>
+            </div>
+            <!-- print / history / report button end -->
+            <!-- custer name and customer address start -->
+            <div class="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div class="w-full xl:w-1/2">
+                    <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Customer name
+                    </label>
+                    <input type="text" placeholder="Enter customer name" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
+                </div>
+
+                <div class="w-full xl:w-1/2">
+                    <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Customer Phone
+                    </label>
+                    <input type="text" placeholder="Notes" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
+                </div>
+            </div>
+            <!--customer name and note end -->
+            <!-- payment method start -->
+            <div class="mb-4">
+                <div class="mb-2">
+                    <p class="font-medium text-black dark:text-white">Payment Method</p>
+                </div>
+                <div class="flex gap-6">
+                    <!-- cash start -->
+                    <div x-data="{ checkboxToggle: false }">
+                        <label for="checkboxLabelTwo" class="flex cursor-pointer select-none items-center text-sm font-medium">
+                            <div class="relative">
+                                <input type="checkbox" id="checkboxLabelTwo" class="sr-only" @change="checkboxToggle = !checkboxToggle">
+                                <div :class="checkboxToggle &amp;&amp; 'border-primary bg-gray dark:bg-transparent'" class="mr-4 flex h-5 w-5 items-center justify-center rounded border">
+                                    <span :class="checkboxToggle &amp;&amp; '!opacity-100'" class="opacity-0">
+                                        <svg width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.0915 0.951972L10.0867 0.946075L10.0813 0.940568C9.90076 0.753564 9.61034 0.753146 9.42927 0.939309L4.16201 6.22962L1.58507 3.63469C1.40401 3.44841 1.11351 3.44879 0.932892 3.63584C0.755703 3.81933 0.755703 4.10875 0.932892 4.29224L0.932878 4.29225L0.934851 4.29424L3.58046 6.95832C3.73676 7.11955 3.94983 7.2 4.1473 7.2C4.36196 7.2 4.55963 7.11773 4.71406 6.9584L10.0468 1.60234C10.2436 1.4199 10.2421 1.1339 10.0915 0.951972ZM4.2327 6.30081L4.2317 6.2998C4.23206 6.30015 4.23237 6.30049 4.23269 6.30082L4.2327 6.30081Z" fill="#3056D3" stroke="#3056D3" stroke-width="0.4"></path>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            Cash
+                        </label>
+                    </div>
+                    <!-- cash end -->
+                    <!-- bank transfer start -->
+                    <div x-data="{ checkboxToggle: false }">
+                        <label for="checkboxLabelTwo" class="flex cursor-pointer select-none items-center text-sm font-medium">
+                            <div class="relative">
+                                <input type="checkbox" id="checkboxLabelTwo" class="sr-only" @change="checkboxToggle = !checkboxToggle">
+                                <div :class="checkboxToggle &amp;&amp; 'border-primary bg-gray dark:bg-transparent'" class="mr-4 flex h-5 w-5 items-center justify-center rounded border">
+                                    <span :class="checkboxToggle &amp;&amp; '!opacity-100'" class="opacity-0">
+                                        <svg width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.0915 0.951972L10.0867 0.946075L10.0813 0.940568C9.90076 0.753564 9.61034 0.753146 9.42927 0.939309L4.16201 6.22962L1.58507 3.63469C1.40401 3.44841 1.11351 3.44879 0.932892 3.63584C0.755703 3.81933 0.755703 4.10875 0.932892 4.29224L0.932878 4.29225L0.934851 4.29424L3.58046 6.95832C3.73676 7.11955 3.94983 7.2 4.1473 7.2C4.36196 7.2 4.55963 7.11773 4.71406 6.9584L10.0468 1.60234C10.2436 1.4199 10.2421 1.1339 10.0915 0.951972ZM4.2327 6.30081L4.2317 6.2998C4.23206 6.30015 4.23237 6.30049 4.23269 6.30082L4.2327 6.30081Z" fill="#3056D3" stroke="#3056D3" stroke-width="0.4"></path>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            Bank Transfer
+                        </label>
+                    </div>
+                    <!-- bank transfer end -->
+                    <!-- credit card start -->
+                    <div x-data="{ checkboxToggle: false }">
+                        <label for="checkboxLabelTwo" class="flex cursor-pointer select-none items-center text-sm font-medium">
+                            <div class="relative">
+                                <input type="checkbox" id="checkboxLabelTwo" class="sr-only" @change="checkboxToggle = !checkboxToggle">
+                                <div :class="checkboxToggle &amp;&amp; 'border-primary bg-gray dark:bg-transparent'" class="mr-4 flex h-5 w-5 items-center justify-center rounded border">
+                                    <span :class="checkboxToggle &amp;&amp; '!opacity-100'" class="opacity-0">
+                                        <svg width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.0915 0.951972L10.0867 0.946075L10.0813 0.940568C9.90076 0.753564 9.61034 0.753146 9.42927 0.939309L4.16201 6.22962L1.58507 3.63469C1.40401 3.44841 1.11351 3.44879 0.932892 3.63584C0.755703 3.81933 0.755703 4.10875 0.932892 4.29224L0.932878 4.29225L0.934851 4.29424L3.58046 6.95832C3.73676 7.11955 3.94983 7.2 4.1473 7.2C4.36196 7.2 4.55963 7.11773 4.71406 6.9584L10.0468 1.60234C10.2436 1.4199 10.2421 1.1339 10.0915 0.951972ZM4.2327 6.30081L4.2317 6.2998C4.23206 6.30015 4.23237 6.30049 4.23269 6.30082L4.2327 6.30081Z" fill="#3056D3" stroke="#3056D3" stroke-width="0.4"></path>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                            Credit Card
+                        </label>
+                    </div>
+                    <!-- Credit Card end -->
+                </div>
+            </div>
+            <!-- payment method end -->
+
+            <!-- payment and change start -->
+            <div class="mb-8 flex flex-col gap-6 xl:flex-row">
+                <div class="w-full xl:w-1/2">
+                    <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                        payment
+                    </label>
+                    <input type="text" x-text="calculateGrandTotal().toFixed(2)" placeholder="payment" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
+                </div>
+                <div class="mb-6 text-xl bg-meta-3 px-10 py-4 text-white hover:bg-opacity-90 font-bold dark:text-white">Total: <span class="text-title-md" x-text="calculateGrandTotal().toFixed(2)"></span>
+                </div>
+
+                <div class="w-full xl:w-1/2">
+                    <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                        Change
+                    </label>
+                    <input type="text" placeholder="change" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
+                </div>
+            </div>
+            <!--payment and notes end  -->
+
+            <!-- save and calculate button -->
+            <div class="mb-7.5 flex flex-wrap gap-5 xl:gap-7.5">
+                <a href="#" class="inline-flex items-center justify-center gap-2.5 bg-primary px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10">
+                    <span>
+                        <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.8125 16.6656H2.1875C1.69022 16.6656 1.21331 16.4681 0.861675 16.1164C0.510044 15.7648 0.3125 15.2879 0.3125 14.7906V5.20935C0.3125 4.71207 0.510044 4.23516 0.861675 3.88353C1.21331 3.53189 1.69022 3.33435 2.1875 3.33435H17.8125C18.3098 3.33435 18.7867 3.53189 19.1383 3.88353C19.49 4.23516 19.6875 4.71207 19.6875 5.20935V14.7906C19.6875 15.2879 19.49 15.7648 19.1383 16.1164C18.7867 16.4681 18.3098 16.6656 17.8125 16.6656ZM2.1875 4.58435C2.02174 4.58435 1.86277 4.6502 1.74556 4.76741C1.62835 4.88462 1.5625 5.04359 1.5625 5.20935V14.7906C1.5625 14.9564 1.62835 15.1153 1.74556 15.2325C1.86277 15.3498 2.02174 15.4156 2.1875 15.4156H17.8125C17.9783 15.4156 18.1372 15.3498 18.2544 15.2325C18.3717 15.1153 18.4375 14.9564 18.4375 14.7906V5.20935C18.4375 5.04359 18.3717 4.88462 18.2544 4.76741C18.1372 4.6502 17.9783 4.58435 17.8125 4.58435H2.1875Z" fill=""></path>
+                            <path d="M9.9996 10.6438C9.63227 10.6437 9.2721 10.5421 8.95898 10.35L0.887102 5.45001C0.744548 5.36381 0.642073 5.22452 0.602222 5.06277C0.58249 4.98268 0.578725 4.89948 0.591144 4.81794C0.603563 4.73639 0.631922 4.65809 0.674602 4.58751C0.717281 4.51692 0.773446 4.45543 0.839888 4.40655C0.906331 4.35767 0.981751 4.32236 1.06184 4.30263C1.22359 4.26277 1.39455 4.28881 1.5371 4.37501L9.60898 9.28126C9.7271 9.35331 9.8628 9.39143 10.0012 9.39143C10.1395 9.39143 10.2752 9.35331 10.3934 9.28126L18.4621 4.37501C18.5323 4.33233 18.6102 4.30389 18.6913 4.29131C18.7725 4.27873 18.8554 4.28227 18.9352 4.30171C19.015 4.32115 19.0901 4.35612 19.1564 4.40462C19.2227 4.45312 19.2788 4.51421 19.3215 4.58438C19.3642 4.65456 19.3926 4.73245 19.4052 4.81362C19.4177 4.89478 19.4142 4.97763 19.3948 5.05743C19.3753 5.13723 19.3404 5.21242 19.2919 5.27871C19.2434 5.34499 19.1823 5.40108 19.1121 5.44376L11.0402 10.35C10.7271 10.5421 10.3669 10.6437 9.9996 10.6438Z" fill=""></path>
+                        </svg>
+                    </span>
+                    Save
+                </a>
+
+                <a href="#" class="inline-flex items-center justify-center gap-2.5 bg-meta-3 px-10 py-4 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10">
+                    <span>
+                        <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.8125 16.6656H2.1875C1.69022 16.6656 1.21331 16.4681 0.861675 16.1164C0.510044 15.7648 0.3125 15.2879 0.3125 14.7906V5.20935C0.3125 4.71207 0.510044 4.23516 0.861675 3.88353C1.21331 3.53189 1.69022 3.33435 2.1875 3.33435H17.8125C18.3098 3.33435 18.7867 3.53189 19.1383 3.88353C19.49 4.23516 19.6875 4.71207 19.6875 5.20935V14.7906C19.6875 15.2879 19.49 15.7648 19.1383 16.1164C18.7867 16.4681 18.3098 16.6656 17.8125 16.6656ZM2.1875 4.58435C2.02174 4.58435 1.86277 4.6502 1.74556 4.76741C1.62835 4.88462 1.5625 5.04359 1.5625 5.20935V14.7906C1.5625 14.9564 1.62835 15.1153 1.74556 15.2325C1.86277 15.3498 2.02174 15.4156 2.1875 15.4156H17.8125C17.9783 15.4156 18.1372 15.3498 18.2544 15.2325C18.3717 15.1153 18.4375 14.9564 18.4375 14.7906V5.20935C18.4375 5.04359 18.3717 4.88462 18.2544 4.76741C18.1372 4.6502 17.9783 4.58435 17.8125 4.58435H2.1875Z" fill=""></path>
+                            <path d="M9.9996 10.6438C9.63227 10.6437 9.2721 10.5421 8.95898 10.35L0.887102 5.45001C0.744548 5.36381 0.642073 5.22452 0.602222 5.06277C0.58249 4.98268 0.578725 4.89948 0.591144 4.81794C0.603563 4.73639 0.631922 4.65809 0.674602 4.58751C0.717281 4.51692 0.773446 4.45543 0.839888 4.40655C0.906331 4.35767 0.981751 4.32236 1.06184 4.30263C1.22359 4.26277 1.39455 4.28881 1.5371 4.37501L9.60898 9.28126C9.7271 9.35331 9.8628 9.39143 10.0012 9.39143C10.1395 9.39143 10.2752 9.35331 10.3934 9.28126L18.4621 4.37501C18.5323 4.33233 18.6102 4.30389 18.6913 4.29131C18.7725 4.27873 18.8554 4.28227 18.9352 4.30171C19.015 4.32115 19.0901 4.35612 19.1564 4.40462C19.2227 4.45312 19.2788 4.51421 19.3215 4.58438C19.3642 4.65456 19.3926 4.73245 19.4052 4.81362C19.4177 4.89478 19.4142 4.97763 19.3948 5.05743C19.3753 5.13723 19.3404 5.21242 19.2919 5.27871C19.2434 5.34499 19.1823 5.40108 19.1121 5.44376L11.0402 10.35C10.7271 10.5421 10.3669 10.6437 9.9996 10.6438Z" fill=""></path>
+                        </svg>
+                    </span>
+                    Calculate
+                </a>
+            </div>
+
+            <!-- save and calculate button end -->
+
         </div>
         <!-- total amount display end -->
 
