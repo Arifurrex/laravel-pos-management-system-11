@@ -8,6 +8,7 @@
     <!-- order product -->
     <div x-data="{
                         inputs: [{ qty: '', price: '', disc: '', total: 0 }],
+                        payment:0,
                         isOptionSelected: false,
                         calculateTotal(index) {
                             let item = this.inputs[index];
@@ -17,9 +18,11 @@
                         calculateGrandTotal() {
                           return this.inputs.reduce((sum, input) => sum + Number(input.total), 0);
                         },
-                        calculatePaid(){
-                            this.calculateGrandTotal();
-                        },
+                        paymentCalculation(){
+
+                            return this.payment - this.calculateGrandTotal();
+                        }
+
                         }"
 
         class="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
@@ -283,16 +286,15 @@
                     <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                         payment
                     </label>
-                    <input type="text" x-text="calculateGrandTotal().toFixed(2)" placeholder="payment" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
-                </div>
-                <div class="mb-6 text-xl bg-meta-3 px-10 py-4 text-white hover:bg-opacity-90 font-bold dark:text-white">Total: <span class="text-title-md" x-text="calculateGrandTotal().toFixed(2)"></span>
+                    <!-- test -->
+                    <input type="text" x-model="payment" placeholder="payment" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
                 </div>
 
                 <div class="w-full xl:w-1/2">
                     <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                         Change
                     </label>
-                    <input type="text" placeholder="change" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
+                    <input :value="paymentCalculation()" readonly type="text" placeholder="change" class="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-normal text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary">
                 </div>
             </div>
             <!--payment and notes end  -->
